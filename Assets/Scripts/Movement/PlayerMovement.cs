@@ -2,21 +2,40 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+[RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
 {
     CharacterController controller;
+    InputController inputController;
 
     public float speed = 10f;
-    public float jumpHeight = 5f;
+    [SerializeField]
+    float jumpForce;
+    [SerializeField]
+    float timeBetweenJumps;
+
+    float nextJump = 0;
     bool isGrounded;
 
     //physics settings
     public float gravity = -9.81f;
     Vector3 velocity;
 
-    private void Start()
+    private void Awake()
     {
         controller = GetComponent<CharacterController>();
+        inputController = FindObjectOfType<InputController>();
+    }
+
+    private void OnEnable()
+    {
+        inputController.OnKeyboardSpaceDown += Jump;
+    }
+
+    private void OnDisable()
+    {
+        inputController.OnKeyboardSpaceDown -= Jump;
     }
 
     void Update()
@@ -24,23 +43,29 @@ public class PlayerMovement : MonoBehaviour
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
-        Vector3 move = transform.right * x + transform.forward * z;
-
-        controller.Move(move * speed * Time.deltaTime);
-
-        //Jump
-
-        if (Input.GetButtonDown("Jump") && controller.isGrounded) {
-            velocity.y += Mathf.Sqrt(jumpHeight * -2f * gravity); 
-        }
+        velocity = transform.right * x * speed + Vector3.up * velocity.y + transform.forward * z * speed;
 
         //physics (gravity)
-        velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
-
-        if (controller.isGrounded && velocity.y < 0) {
+        if (controller.isGrounded && velocity.y < 0)
+        {
             velocity.y = -2;
         }
-        //RaycastHit(Vector3.down);
+        else
+        {
+            velocity.y += gravity * Time.deltaTime;
+        }
+        controller.Move(velocity * Time.deltaTime);
+    }
+
+    public void Jump()
+    {
+        if (controller.isGrounded)
+        {
+            if (nextJump <= Time.time)
+            {
+                velocity.y = jumpForce;
+                nextJump = Time.time + timeBetweenJumps;
+            }
+        }
     }
 }
