@@ -15,7 +15,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     float timeBetweenJumps;
 
-    float nextJump = 0;
     bool isGrounded;
 
     //physics settings
@@ -61,11 +60,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (controller.isGrounded)
         {
-            if (nextJump <= Time.time)
-            {
-                velocity.y = jumpForce;
-                nextJump = Time.time + timeBetweenJumps;
-            }
+            velocity.y = jumpForce;
         }
     }
 }
