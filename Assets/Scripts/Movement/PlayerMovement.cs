@@ -39,10 +39,20 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        MovePlayer();
+    }
+
+    void MovePlayer()
+    {
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
         velocity = transform.right * x * speed + Vector3.up * velocity.y + transform.forward * z * speed;
+        
+        if (velocity.y < velocity.z)
+        {
+            velocity.y += gravity * Time.deltaTime; 
+        }
 
         //physics (gravity)
         if (controller.isGrounded && velocity.y < 0)
